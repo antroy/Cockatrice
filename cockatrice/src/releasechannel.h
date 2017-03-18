@@ -45,7 +45,7 @@ protected:
     QNetworkReply *response;
     Release * lastRelease;
 protected:
-    static bool downloadMatchesCurrentOS(QVariantMap build);
+    static bool downloadMatchesCurrentOS(const QString &fileName);
     virtual QString getReleaseChannelUrl() const = 0;
 public:
     int getIndex() const { return index; }

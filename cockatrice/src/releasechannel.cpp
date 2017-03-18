@@ -3,7 +3,6 @@
 #include "version_string.h"
 
 #include <QNetworkReply>
-#include <QNetworkAccessManager>
 #include <QMessageBox>
 
 #define STABLERELEASE_URL "https://api.github.com/repos/Cockatrice/Cockatrice/releases/latest"
@@ -42,16 +41,16 @@ void ReleaseChannel::checkForUpdates()
 }
 
 #if defined(Q_OS_OSX)
-bool ReleaseChannel::downloadMatchesCurrentOS(QVariantMap build)
+bool ReleaseChannel::downloadMatchesCurrentOS(const QString &fileName)
 {
-    return build["name"].toString().endsWith(".dmg");
+    return fileName.endsWith(".dmg");
 }
 
 #elif defined(Q_OS_WIN)
 
 #include <QSysInfo>
 
-bool ReleaseChannel::downloadMatchesCurrentOS(QVariantMap build)
+bool ReleaseChannel::downloadMatchesCurrentOS(const QString &fileName)
 {
     QString wordSize = QSysInfo::buildAbi().split('-')[2];
     QString arch;
@@ -68,18 +67,13 @@ bool ReleaseChannel::downloadMatchesCurrentOS(QVariantMap build)
         return false;
     }
 
-    auto fileName = build["name"].toString();
-    // Checking for .zip is a workaround for the May 6th 2016 release
-    auto zipName = arch + ".zip";
     auto exeName = arch + ".exe";
-    auto zipDebugName = devSnapshotEnd + ".zip";
     auto exeDebugName = devSnapshotEnd + ".exe";
-    return (fileName.endsWith(exeName) || fileName.endsWith(zipName) ||
-        fileName.endsWith(exeDebugName) || fileName.endsWith(zipDebugName));
+    return (fileName.endsWith(exeName) || fileName.endsWith(exeDebugName));
 }
 #else
 
-bool ReleaseChannel::downloadMatchesCurrentOS(QVariantMap)
+bool ReleaseChannel::downloadMatchesCurrentOS(const QString &)
 {
     //If the OS doesn't fit one of the above #defines, then it will never match
     return false;
@@ -132,7 +126,24 @@ void StableReleaseChannel::releaseListFinished()
     lastRelease->setDescriptionUrl(resultMap["html_url"].toString());
     lastRelease->setPublishDate(resultMap["published_at"].toDate());
 
-    qDebug() << "Got reply from release server, size=" << tmp.size()
+    if (resultMap.contains("assets")) {
+        auto rawAssets = resultMap["assets"].toList();
+        // [(name, url)]
+        QVector<std::pair<QString, QString>> assets;
+        std::transform(rawAssets.begin(), rawAssets.end(), assets.begin(), [](QVariant _asset) {
+            QVariantMap asset = _asset.toMap();
+            QString name = asset["name"].toString();
+            QString url = asset["url"].toString();
+            return std::make_pair(name, url);
+        });
+
+        QVector<std::pair<QString, QString>> assetsForThisPlatform;
+        std::copy_if(assets.begin(), assets.end(), assetsForThisPlatform.begin(), [](auto nameAndUrl) {
+           return downloadMatchesCurrentOS(nameAndUrl.first);
+        });
+    }
+
+    qInfo() << "Got reply from release server, size=" << tmp.size()
         << "name=" << lastRelease->getName()
         << "desc=" << lastRelease->getDescriptionUrl()
         << "date=" << lastRelease->getPublishDate();
@@ -310,7 +321,7 @@ void DevReleaseChannel::fileListFinished()
         if(!map["version"].toString().endsWith(shortHash))
             continue;
 
-        if(!downloadMatchesCurrentOS(map))
+        if(!downloadMatchesCurrentOS(map["build"].toString()))
             continue;
 
         compatibleVersion = true;
