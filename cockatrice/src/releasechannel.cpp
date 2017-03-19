@@ -126,6 +126,8 @@ void StableReleaseChannel::releaseListFinished()
     lastRelease->setDescriptionUrl(resultMap["html_url"].toString());
     lastRelease->setPublishDate(resultMap["published_at"].toDate());
 
+    bool compatibleVersionFound = false;
+
     if (resultMap.contains("assets")) {
         auto rawAssets = resultMap["assets"].toList();
         // [(name, url)]
@@ -137,23 +139,34 @@ void StableReleaseChannel::releaseListFinished()
             return std::make_pair(name, url);
         });
 
-        QVector<std::pair<QString, QString>> assetsForThisPlatform;
-        std::copy_if(assets.begin(), assets.end(), assetsForThisPlatform.begin(), [](auto nameAndUrl) {
+        auto _releaseAsset = std::find_if(assets.begin(), assets.end(), [](auto nameAndUrl) {
            return downloadMatchesCurrentOS(nameAndUrl.first);
         });
+
+        if (_releaseAsset != assets.end()) {
+            std::pair<QString, QString> releaseAsset = *_releaseAsset;
+            auto releaseUrl = releaseAsset.second;
+            lastRelease->setDownloadUrl(releaseUrl);
+            compatibleVersionFound = true;
+        }
     }
+
+    QString shortHash = lastRelease->getCommitHash().left(GIT_SHORT_HASH_LEN);
+    QString myHash = QString(VERSION_COMMIT);
+    qDebug() << "Current hash=" << myHash << "update hash=" << shortHash;
+
+    const bool needToUpdate = (QString::compare(shortHash, myHash, Qt::CaseInsensitive) != 0);
 
     qInfo() << "Got reply from release server, size=" << tmp.size()
         << "name=" << lastRelease->getName()
         << "desc=" << lastRelease->getDescriptionUrl()
-        << "date=" << lastRelease->getPublishDate();
+        << "date=" << lastRelease->getPublishDate()
+        << "url=" << lastRelease->getDownloadUrl();
 
-    QString url = QString(STABLETAG_URL) + resultMap["tag_name"].toString();
-    qDebug() << "Searching for a corresponding tag on the stable channel: " << url;
-    response = netMan->get(QNetworkRequest(url));
-    connect(response, SIGNAL(finished()), this, SLOT(tagListFinished()));
+    emit finishedCheck(needToUpdate, compatibleVersionFound, lastRelease);
 }
 
+// TODO delete
 void StableReleaseChannel::tagListFinished()
 {
     QNetworkReply *reply = static_cast<QNetworkReply *>(sender());
@@ -184,6 +197,7 @@ void StableReleaseChannel::tagListFinished()
     connect(response, SIGNAL(finished()), this, SLOT(fileListFinished()));
 }
 
+// TODO delete
 void StableReleaseChannel::fileListFinished()
 {
     QNetworkReply *reply = static_cast<QNetworkReply *>(sender());
