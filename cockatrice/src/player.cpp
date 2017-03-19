@@ -779,6 +779,7 @@ void Player::setShortcutsActive()
     aViewSideboard->setShortcut(settingsCache->shortcuts().getSingleShortcut("Player/aViewSideboard"));
     aViewLibrary->setShortcut(settingsCache->shortcuts().getSingleShortcut("Player/aViewLibrary"));
     aViewTopCards->setShortcut(settingsCache->shortcuts().getSingleShortcut("Player/aViewTopCards"));
+    aMoveTopCardsToGrave->setShortcut(settingsCache->shortcuts().getSingleShortcut("Player/aMoveTopCardsToGrave"));
     aViewGraveyard->setShortcut(settingsCache->shortcuts().getSingleShortcut("Player/aViewGraveyard"));
     aDrawCard->setShortcut(settingsCache->shortcuts().getSingleShortcut("Player/aDrawCard"));
     aDrawCards->setShortcut(settingsCache->shortcuts().getSingleShortcut("Player/aDrawCards"));
@@ -799,6 +800,7 @@ void Player::setShortcutsInactive()
     aViewSideboard->setShortcut(QKeySequence());
     aViewLibrary->setShortcut(QKeySequence());
     aViewTopCards->setShortcut(QKeySequence());
+    aMoveTopCardsToGrave->setShortcut(QKeySequence());
     aViewGraveyard->setShortcut(QKeySequence());
     aDrawCard->setShortcut(QKeySequence());
     aDrawCards->setShortcut(QKeySequence());

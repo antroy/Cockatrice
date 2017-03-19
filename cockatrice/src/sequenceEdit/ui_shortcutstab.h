@@ -220,6 +220,8 @@ public:
     SequenceEdit *Player_aMoveToExile;
     QLabel *lbl_Player_aMoveToHand;
     SequenceEdit *Player_aMoveToHand;
+    QLabel *lbl_Player_aMoveTopToGrave;
+    SequenceEdit *Player_aMoveTopToGrave;
     QGroupBox *groupBox_16;
     QGridLayout *gridLayout_16;
     QLabel *lbl_Player_aViewGraveyard;
@@ -1177,6 +1179,16 @@ public:
 
         gridLayout_15->addWidget(Player_aMoveToHand, 4, 1, 1, 1);
 
+        lbl_Player_aMoveTopToGrave = new QLabel(groupBox_15);
+        lbl_Player_aMoveTopToGrave->setObjectName("lbl_Player_aMoveTopToGrave");
+
+        gridLayout_15->addWidget(lbl_Player_aMoveTopToGrave, 5, 0, 1, 1);
+
+        Player_aMoveTopToGrave = new SequenceEdit("Player/aMoveTopCardsToGrave",groupBox_15);
+        Player_aMoveTopToGrave->setObjectName("Player_aMoveTopToGrave");
+
+        gridLayout_15->addWidget(Player_aMoveTopToGrave, 5, 1, 1, 1);
+
         gridLayout_20->addWidget(groupBox_15, 0, 1, 1, 1);
 
         groupBox_16 = new QGroupBox(tab_3);
@@ -1565,6 +1577,7 @@ public:
         lbl_Player_aMoveToGraveyard->setText(QApplication::translate("shortcutsTab", "Graveyard", 0));
         lbl_Player_aMoveToExile->setText(QApplication::translate("shortcutsTab", "Exile", 0));
         lbl_Player_aMoveToHand->setText(QApplication::translate("shortcutsTab", "Hand", 0));
+        lbl_Player_aMoveTopToGrave->setText(QApplication::translate("shortcutsTab", "Lib to Graveyard", 0));
         groupBox_16->setTitle(QApplication::translate("shortcutsTab", "View", 0));
         lbl_Player_aViewGraveyard->setText(QApplication::translate("shortcutsTab", "Graveyard", 0));
         lbl_Player_aViewLibrary->setText(QApplication::translate("shortcutsTab", "Library", 0));

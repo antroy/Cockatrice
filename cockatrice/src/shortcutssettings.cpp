@@ -224,6 +224,7 @@ void ShortcutsSettings::fillDefaultShorcuts()
     defaultShortCuts["Player/aViewRfg"] = parseSequenceString("");
     defaultShortCuts["Player/aViewSideboard"] = parseSequenceString("Ctrl+F3");
     defaultShortCuts["Player/aViewTopCards"] = parseSequenceString("Ctrl+W");
+    defaultShortCuts["Player/aMoveTopCardsToGrave"] = parseSequenceString("Ctrl+Shift+W");
     defaultShortCuts["Player/aConcede"] = parseSequenceString("F2");
     defaultShortCuts["Player/aLeaveGame"] = parseSequenceString("Ctrl+Q");
     defaultShortCuts["Player/aNextPhase"] = parseSequenceString("Ctrl+Space;Tab");
